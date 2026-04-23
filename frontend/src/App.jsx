@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard.jsx'
 import PortalForm from './pages/PortalForm.jsx'
 import PortalHistory from './pages/PortalHistory.jsx'
 import Settings from './pages/Settings.jsx'
+import Billing from './pages/Billing.jsx'
 import Admin from './pages/Admin.jsx'
 
 function App() {
@@ -51,6 +52,7 @@ function App() {
             {user ? (
               <>
                 <a href="/dashboard">Dashboard</a>
+                <a href="/billing">Billing</a>
                 {user.is_admin && <a href="/admin">Admin</a>}
                 <a href="/settings">Settings</a>
                 <button onClick={handleLogout} className="btn-link">Logout</button>
@@ -78,6 +80,7 @@ function App() {
           <Route path="/portal/:id/edit" element={<PortalForm />} />
           <Route path="/portal/:id/history" element={<PortalHistory />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/billing" element={<Billing />} />
           <Route path="/admin" element={<Admin />} />
         </Routes>
       </main>

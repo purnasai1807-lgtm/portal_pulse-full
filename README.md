@@ -79,12 +79,34 @@ Every push to `master` now auto-deploys!
 - `SECRET_KEY`: Flask secret key
 - `DATABASE_URL`: PostgreSQL connection string
 - `STRIPE_SECRET_KEY`: Stripe API key
+- `STRIPE_WEBHOOK_SECRET`: Stripe webhook signing secret
 - `STRIPE_PRICE_ID`: Stripe product price ID
+- `STRIPE_PRICE_PRO`: Stripe Pro plan price ID
+- `STRIPE_PRICE_ENTERPRISE`: Stripe Enterprise plan price ID
 - `FRONTEND_URL`: Frontend URL for CORS
 - `EMAIL_HOST/PORT/USER/PASS/FROM`: Email configuration
 
 ### Frontend
 - `VITE_API_BASE_URL`: Backend API URL
+- `VITE_STRIPE_PUBLISHABLE_KEY`: Stripe publishable key (for future payment UI)
+
+## Payment Setup
+
+**Important**: To enable subscription payments and monetize your app, you must set up Stripe.
+
+See [STRIPE_SETUP.md](./STRIPE_SETUP.md) for detailed instructions:
+1. Create a Stripe account
+2. Get API keys
+3. Create products and pricing
+4. Configure webhooks (for production)
+5. Set environment variables
+
+### Subscription Tiers
+- **Free**: 2 portals
+- **Pro**: 50 portals - $29/month
+- **Enterprise**: 500 portals - $99/month
+
+Users cannot create portals beyond their plan limit. Portal limits are enforced in the `/api/portals` POST endpoint.
 
 ## API Documentation
 
@@ -94,9 +116,17 @@ Every push to `master` now auto-deploys!
 - `POST /api/auth/logout` - Logout
 - `GET /api/auth/me` - Get current user
 
+### Billing
+- `GET /api/billing/plans` - Get available plans
+- `GET /api/billing/status` - Get subscription status
+- `POST /api/billing/create-checkout-session` - Create Stripe checkout
+- `POST /api/billing/portal` - Open Stripe billing portal
+- `POST /api/billing/cancel-subscription` - Cancel subscription
+- `POST /api/webhook/stripe` - Stripe webhook endpoint
+
 ### Portals
 - `GET /api/portals` - List portals
-- `POST /api/portals` - Create portal
+- `POST /api/portals` - Create portal (respects plan limits)
 - `PUT /api/portals/:id` - Update portal
 - `DELETE /api/portals/:id` - Delete portal
 - `POST /api/portals/:id/test` - Test portal

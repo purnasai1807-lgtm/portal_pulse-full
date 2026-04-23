@@ -17,6 +17,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from ai_engine import analyze_portal
 from chatbot import generate_response
 from models import AppSetting, Portal, PortalAlert, PortalCheck, User, db
+from stripe_payment import create_checkout_session, get_subscription_status, cancel_subscription, get_portal_limit, handle_webhook, PLANS
 
 APP_NAME = "PortalPulse Pro"
 
@@ -282,6 +283,34 @@ def create_app():
             }
         })
 
+    # === BILLING ENDPOINTS ===
+    
+    @app.get("/api/billing/plans")
+    def get_plans():
+        """Get available subscription plans"""
+        return jsonify({
+            "plans": [
+                {"id": k, "name": v["name"], "price": v["price"], "portals": v["portals"]}
+                for k, v in PLANS.items()
+            ]
+        })
+
+    @app.get("/api/billing/status")
+    @login_required
+    def billing_status():
+        """Get current subscription status"""
+        user = current_user()
+        status = get_subscription_status(user)
+        portal_limit = get_portal_limit(user)
+        portal_count = Portal.query.filter_by(user_id=user.id).count()
+        
+        return jsonify({
+            "subscription": status,
+            "portal_limit": portal_limit,
+            "portal_count": portal_count,
+            "portals_remaining": max(0, portal_limit - portal_count)
+        })
+
     @app.post("/api/billing/create-checkout-session")
     @login_required
     def create_checkout_session():
@@ -319,6 +348,34 @@ def create_app():
             return_url=f"{app_url}/dashboard"
         )
         return jsonify({"url": portal_session.url})
+
+    @app.post("/api/billing/cancel-subscription")
+    @login_required
+    def billing_cancel_subscription():
+        """Cancel user's subscription"""
+        user = current_user()
+        if cancel_subscription(user):
+            return jsonify({"message": "Subscription canceled"})
+        return jsonify({"error": "Failed to cancel subscription"}), 400
+
+    @app.post("/api/webhook/stripe")
+    def stripe_webhook():
+        """Handle Stripe webhook events"""
+        payload = request.get_data(as_text=True)
+        sig_header = request.headers.get("stripe-signature")
+        webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
+
+        try:
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, webhook_secret
+            )
+        except ValueError:
+            return jsonify({"error": "Invalid payload"}), 400
+        except stripe.error.SignatureVerificationError:
+            return jsonify({"error": "Invalid signature"}), 400
+
+        handle_webhook(event)
+        return jsonify({"received": True})
 
     @app.post("/api/billing/stripe/webhook")
     def stripe_webhook():
@@ -472,6 +529,14 @@ def create_app():
         payload, error = validate_portal_payload(request.get_json(force=True))
         if error:
             return jsonify({"error": error}), 400
+
+        # Check portal limit
+        portal_limit = get_portal_limit(user)
+        portal_count = Portal.query.filter_by(user_id=user.id).count()
+        if portal_count >= portal_limit:
+            return jsonify({
+                "error": f"Portal limit reached ({portal_limit}). Upgrade your plan to create more portals."
+            }), 403
 
         portal = Portal(
             user_id=user.id,
