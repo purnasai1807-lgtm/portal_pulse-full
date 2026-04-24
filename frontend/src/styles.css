@@ -253,6 +253,25 @@ main {
   color: white;
 }
 
+.badge-low {
+  background: #10b981;
+  color: white;
+}
+
+.badge-medium {
+  background: #f59e0b;
+  color: white;
+}
+
+.badge-high {
+  background: #ef4444;
+  color: white;
+}
+
+.ml-1 {
+  margin-left: 0.25rem;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;

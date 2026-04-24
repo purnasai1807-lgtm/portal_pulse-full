@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Api from '../api.js';
 import './Billing.css';
 
 export default function Billing() {
@@ -14,8 +15,7 @@ export default function Billing() {
 
   const fetchPlans = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/billing/plans`);
-      const data = await res.json();
+      const data = await Api.getPlans();
       setPlans(data.plans || []);
     } catch (err) {
       console.error('Error fetching plans:', err);
@@ -24,10 +24,7 @@ export default function Billing() {
 
   const fetchSubscription = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/billing/status`, {
-        credentials: 'include'
-      });
-      const data = await res.json();
+      const data = await Api.getBillingStatus();
       setSubscription(data);
       setLoading(false);
     } catch (err) {
@@ -43,38 +40,28 @@ export default function Billing() {
     }
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/billing/create-checkout-session`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: planId })
-      });
-      const data = await res.json();
+      const data = await Api.createCheckoutSession(planId);
       if (data.url) {
         window.location.href = data.url;
       } else {
         setError(data.error || 'Failed to create checkout session');
       }
     } catch (err) {
-      setError('Error creating checkout session');
+      setError(err.message || 'Error creating checkout session');
       console.error(err);
     }
   };
 
   const handleBillingPortal = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/billing/portal`, {
-        method: 'POST',
-        credentials: 'include'
-      });
-      const data = await res.json();
+      const data = await Api.billingPortal();
       if (data.url) {
         window.location.href = data.url;
       } else {
         setError(data.error || 'Failed to open billing portal');
       }
     } catch (err) {
-      setError('Error accessing billing portal');
+      setError(err.message || 'Error accessing billing portal');
       console.error(err);
     }
   };
@@ -82,19 +69,11 @@ export default function Billing() {
   const handleCancel = async () => {
     if (window.confirm('Are you sure you want to cancel your subscription?')) {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/billing/cancel-subscription`, {
-          method: 'POST',
-          credentials: 'include'
-        });
-        const data = await res.json();
-        if (res.ok) {
-          setError(null);
-          fetchSubscription();
-        } else {
-          setError(data.error || 'Failed to cancel subscription');
-        }
+        await Api.cancelSubscription();
+        setError(null);
+        fetchSubscription();
       } catch (err) {
-        setError('Error canceling subscription');
+        setError(err.message || 'Error canceling subscription');
         console.error(err);
       }
     }

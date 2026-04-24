@@ -109,8 +109,23 @@ const Api = {
     return this.request('/api/admin')
   },
 
-  async createCheckoutSession() {
+  async createCheckoutSession(plan) {
     return this.request('/api/billing/create-checkout-session', {
+      method: 'POST',
+      body: JSON.stringify({ plan })
+    })
+  },
+
+  async getPlans() {
+    return this.request('/api/billing/plans')
+  },
+
+  async getBillingStatus() {
+    return this.request('/api/billing/status')
+  },
+
+  async cancelSubscription() {
+    return this.request('/api/billing/cancel-subscription', {
       method: 'POST'
     })
   },

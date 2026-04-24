@@ -139,9 +139,15 @@ function Dashboard() {
                 <div key={item.portal.id} className='card'>
                   <div className='flex-between mb-2'>
                     <h3>{item.portal.name}</h3>
-                    <div>
+                  <div>
                       <span className='badge'>
                         {item.portal.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                      {item.portal.fast_mode && (
+                        <span className='badge badge-warning ml-1'>Fast</span>
+                      )}
+                      <span className={`badge badge-${item.portal.priority_level} ml-1`}>
+                        {item.portal.priority_level}
                       </span>
                     </div>
                   </div>

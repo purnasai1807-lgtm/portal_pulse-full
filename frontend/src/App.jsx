@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Routes, Route, useNavigate } from 'react-router-dom'
+import { Routes, Route, useNavigate, Link } from 'react-router-dom'
 import Api from './api.js'
 import Landing from './pages/Landing.jsx'
 import Pricing from './pages/Pricing.jsx'
@@ -49,20 +49,20 @@ function App() {
         <div className="container">
           <h1 className="logo">PortalPulse Pro</h1>
           <nav>
-            {user ? (
+          {user ? (
               <>
-                <a href="/dashboard">Dashboard</a>
-                <a href="/billing">Billing</a>
-                {user.is_admin && <a href="/admin">Admin</a>}
-                <a href="/settings">Settings</a>
+                <Link to="/dashboard">Dashboard</Link>
+                <Link to="/billing">Billing</Link>
+                {user.is_admin && <Link to="/admin">Admin</Link>}
+                <Link to="/settings">Settings</Link>
                 <button onClick={handleLogout} className="btn-link">Logout</button>
               </>
             ) : (
               <>
-                <a href="/">Home</a>
-                <a href="/pricing">Pricing</a>
-                <a href="/login">Login</a>
-                <a href="/register">Register</a>
+                <Link to="/">Home</Link>
+                <Link to="/pricing">Pricing</Link>
+                <Link to="/login">Login</Link>
+                <Link to="/register">Register</Link>
               </>
             )}
           </nav>

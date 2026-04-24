@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Smart Portal AutoFill Assistant",
+  "version": "1.0.0",
+  "description": "Safe one-click autofill assistant for portal forms.",
+  "permissions": ["storage", "activeTab", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "AutoFill Assistant"
+  }
+}
+

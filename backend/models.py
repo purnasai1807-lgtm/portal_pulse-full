@@ -13,6 +13,7 @@ class User(db.Model):
     stripe_customer_id = db.Column(db.String(255), default="", nullable=False, index=True)
     stripe_subscription_id = db.Column(db.String(255), default="", nullable=False, index=True)
     subscription_status = db.Column(db.String(50), default="inactive", nullable=False, index=True)
+    plan = db.Column(db.String(20), default="free", nullable=False, index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
 class AppSetting(db.Model):
@@ -44,6 +45,8 @@ class Portal(db.Model):
     block_words_json = db.Column(db.Text, default="[]", nullable=False)
     json_rules_json = db.Column(db.Text, default="[]", nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
+    fast_mode = db.Column(db.Boolean, default=False, nullable=False)
+    priority_level = db.Column(db.String(20), default="medium", nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 

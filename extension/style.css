@@ -1,0 +1,36 @@
+body {
+  width: 280px;
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: white;
+  padding: 14px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: white;
+  box-sizing: border-box;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#msg {
+  font-size: 13px;
+  color: #86efac;
+}
+

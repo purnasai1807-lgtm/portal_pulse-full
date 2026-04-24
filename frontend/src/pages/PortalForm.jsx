@@ -15,7 +15,9 @@ function PortalForm() {
     trigger_words_json: '[]',
     block_words_json: '[]',
     json_rules_json: '[]',
-    is_active: true
+    is_active: true,
+    fast_mode: false,
+    priority_level: 'medium'
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -40,7 +42,9 @@ function PortalForm() {
           trigger_words_json: portal.trigger_words_json,
           block_words_json: portal.block_words_json,
           json_rules_json: portal.json_rules_json,
-          is_active: portal.is_active
+          is_active: portal.is_active,
+          fast_mode: portal.fast_mode,
+          priority_level: portal.priority_level
         })
       }
     } catch (err) {
@@ -115,6 +119,27 @@ function PortalForm() {
                 <option value="html">HTML (Web Page)</option>
                 <option value="json">JSON (API Response)</option>
               </select>
+            </div>
+
+            <div className="form-group">
+              <label>Priority Level</label>
+              <select name="priority_level" value={form.priority_level} onChange={handleChange}>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>
+                <input
+                  type="checkbox"
+                  name="fast_mode"
+                  checked={form.fast_mode}
+                  onChange={handleChange}
+                />
+                Fast Mode (more frequent checks)
+              </label>
             </div>
             
             <div className="form-group">

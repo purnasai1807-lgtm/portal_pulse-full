@@ -132,6 +132,10 @@ def validate_portal_payload(payload):
     if mode not in ["html", "json"]:
         return None, "Mode must be html or json"
 
+    priority_level = (payload.get("priority_level") or "medium").strip().lower()
+    if priority_level not in ["low", "medium", "high"]:
+        return None, "Priority must be low, medium, or high"
+
     return {
         "name": name,
         "url": url,
@@ -140,7 +144,9 @@ def validate_portal_payload(payload):
         "trigger_words_json": trigger_words_json,
         "block_words_json": block_words_json,
         "json_rules_json": json_rules_json,
-        "is_active": bool(payload.get("is_active", True))
+        "is_active": bool(payload.get("is_active", True)),
+        "fast_mode": bool(payload.get("fast_mode", False)),
+        "priority_level": priority_level
     }, None
 
 def create_app():
@@ -258,7 +264,8 @@ def create_app():
                 "name": user.name,
                 "email": user.email,
                 "is_admin": user.is_admin,
-                "subscription_status": user.subscription_status
+                "subscription_status": user.subscription_status,
+                "plan": user.plan
             }
         })
 
@@ -279,6 +286,7 @@ def create_app():
                 "email": user.email,
                 "is_admin": user.is_admin,
                 "subscription_status": user.subscription_status,
+                "plan": user.plan,
                 "stripe_customer_id": user.stripe_customer_id
             }
         })
@@ -313,25 +321,18 @@ def create_app():
 
     @app.post("/api/billing/create-checkout-session")
     @login_required
-    def create_checkout_session():
+    def checkout():
         user = current_user()
-        price_id = os.environ.get("STRIPE_PRICE_ID", "")
-        app_url = os.environ.get("FRONTEND_URL", "http://localhost:5173")
+        data = request.get_json(force=True) or {}
+        plan_type = (data.get("plan") or "pro").strip().lower()
 
-        if not stripe.api_key or not price_id:
-            return jsonify({"error": "Stripe is not configured"}), 400
+        if plan_type not in PLANS:
+            return jsonify({"error": "Invalid plan"}), 400
 
-        customer_id = user.stripe_customer_id or None
-        checkout_session = stripe.checkout.Session.create(
-            mode="subscription",
-            line_items=[{"price": price_id, "quantity": 1}],
-            success_url=f"{app_url}/dashboard?checkout=success",
-            cancel_url=f"{app_url}/pricing?checkout=cancelled",
-            client_reference_id=str(user.id),
-            customer=customer_id,
-            customer_email=None if customer_id else user.email,
-            allow_promotion_codes=True
-        )
+        checkout_session = create_checkout_session(user, plan_type)
+        if not checkout_session:
+            return jsonify({"error": "Stripe is not configured for this plan"}), 400
+
         return jsonify({"url": checkout_session.url})
 
     @app.post("/api/billing/portal")
@@ -378,61 +379,9 @@ def create_app():
         return jsonify({"received": True})
 
     @app.post("/api/billing/stripe/webhook")
-    def stripe_webhook():
-        payload = request.data
-        sig_header = request.headers.get("Stripe-Signature", "")
-        webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
-
-        try:
-            if webhook_secret:
-                event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
-            else:
-                event = json.loads(payload.decode("utf-8"))
-        except Exception:
-            return "invalid", 400
-
-        event_type = event["type"]
-        data_object = event["data"]["object"]
-
-        if event_type == "checkout.session.completed":
-            client_reference_id = data_object.get("client_reference_id")
-            customer_id = data_object.get("customer")
-            subscription_id = data_object.get("subscription")
-            if client_reference_id:
-                user = User.query.get(int(client_reference_id))
-                if user:
-                    user.stripe_customer_id = customer_id or user.stripe_customer_id
-                    user.stripe_subscription_id = subscription_id or user.stripe_subscription_id
-                    user.subscription_status = "active"
-                    db.session.commit()
-
-        elif event_type in ["customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted"]:
-            customer_id = data_object.get("customer", "")
-            subscription_id = data_object.get("id", "")
-            status = data_object.get("status", "inactive")
-            user = User.query.filter_by(stripe_customer_id=customer_id).first()
-            if user:
-                user.stripe_subscription_id = subscription_id
-                user.subscription_status = status
-                db.session.commit()
-
-        elif event_type == "invoice.paid":
-            customer_id = data_object.get("customer", "")
-            subscription_id = data_object.get("subscription", "")
-            user = User.query.filter_by(stripe_customer_id=customer_id).first()
-            if user:
-                user.stripe_subscription_id = subscription_id or user.stripe_subscription_id
-                user.subscription_status = "active"
-                db.session.commit()
-
-        elif event_type == "invoice.payment_failed":
-            customer_id = data_object.get("customer", "")
-            user = User.query.filter_by(stripe_customer_id=customer_id).first()
-            if user:
-                user.subscription_status = "past_due"
-                db.session.commit()
-
-        return "ok", 200
+    def stripe_webhook_legacy():
+        """Legacy webhook endpoint for backward compatibility"""
+        return stripe_webhook()
 
     @app.get("/api/dashboard")
     @login_required
@@ -458,7 +407,9 @@ def create_app():
                     "name": portal.name,
                     "url": portal.url,
                     "mode": portal.mode,
-                    "is_active": portal.is_active
+                    "is_active": portal.is_active,
+                    "fast_mode": portal.fast_mode,
+                    "priority_level": portal.priority_level
                 },
                 "latest_check": {
                     "status_text": latest_check.status_text if latest_check else None,
@@ -516,7 +467,9 @@ def create_app():
                     "trigger_words_json": p.trigger_words_json,
                     "block_words_json": p.block_words_json,
                     "json_rules_json": p.json_rules_json,
-                    "is_active": p.is_active
+                    "is_active": p.is_active,
+                    "fast_mode": p.fast_mode,
+                    "priority_level": p.priority_level
                 }
                 for p in portals
             ]
@@ -548,6 +501,8 @@ def create_app():
             block_words_json=payload["block_words_json"],
             json_rules_json=payload["json_rules_json"],
             is_active=payload["is_active"],
+            fast_mode=payload["fast_mode"],
+            priority_level=payload["priority_level"],
             created_at=datetime.utcnow(),
             updated_at=datetime.utcnow()
         )
@@ -575,6 +530,8 @@ def create_app():
         portal.block_words_json = payload["block_words_json"]
         portal.json_rules_json = payload["json_rules_json"]
         portal.is_active = payload["is_active"]
+        portal.fast_mode = payload["fast_mode"]
+        portal.priority_level = payload["priority_level"]
         portal.updated_at = datetime.utcnow()
         db.session.commit()
         return jsonify({"message": "Portal updated"})
