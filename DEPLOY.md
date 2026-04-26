@@ -1,5 +1,5 @@
 i# 🚀 Deploy PortalPulse to Production
-**GitHub:** `purnasai1807-Igtm`
+**GitHub:** `purnasai1807-lgtm`
 
 ---
 
