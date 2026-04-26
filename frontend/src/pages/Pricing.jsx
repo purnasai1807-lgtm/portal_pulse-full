@@ -25,24 +25,24 @@ function Pricing() {
         
         <div className="grid grid-2">
           <div className="card">
-            <h2>Free Trial</h2>
-            <div className="price"></div>
-            <p>Perfect for trying out PortalPulse Pro</p>
+            <h2>Free Plan</h2>
+            <div className="price">$0<span>/month</span></div>
+            <p>Perfect for individual users getting started</p>
             <ul>
-              <li>1 portal monitoring</li>
+              <li>2 portal monitors</li>
               <li>Email alerts only</li>
               <li>Basic AI insights</li>
-              <li>7-day trial</li>
+              <li>No credit card required</li>
             </ul>
-            <p className="text-center">Sign up to start your free trial</p>
+            <p className="text-center">Sign up and start monitoring right away</p>
           </div>
 
           <div className="card featured">
             <h2>Pro Plan</h2>
-            <div className="price">.99<span>/month</span></div>
+            <div className="price">$29<span>/month</span></div>
             <p>Full access to all features</p>
             <ul>
-              <li>Unlimited portals</li>
+              <li>50 portal monitors</li>
               <li>Telegram, WhatsApp & Email alerts</li>
               <li>Advanced AI insights</li>
               <li>Admin dashboard</li>

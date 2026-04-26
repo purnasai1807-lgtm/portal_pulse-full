@@ -46,6 +46,7 @@ Or manually:
 
 ### Step 3: Set Environment Variables
 After deploy, in Render Dashboard:
+- `ADMIN_EMAIL` (your owner/admin account email)
 - `STRIPE_SECRET_KEY` (from Stripe dashboard)
 - `STRIPE_PRICE_PRO` (Stripe price ID)
 - `STRIPE_PRICE_ENTERPRISE` (Stripe price ID)

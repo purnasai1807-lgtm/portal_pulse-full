@@ -49,6 +49,7 @@ The app is configured for automatic deployment using GitHub Actions.
 4. Render auto-detects `render.yaml` and creates services
 5. Add environment variables:
    - `SECRET_KEY`: Random string
+   - `ADMIN_EMAIL`: Email address that should become the owner/admin account
    - `STRIPE_SECRET_KEY`: Your Stripe key
    - `STRIPE_PRICE_ID`: Your Stripe price ID
    - `DATABASE_URL`: Auto-provided by Render
@@ -77,6 +78,7 @@ Every push to `master` now auto-deploys!
 
 ### Backend
 - `SECRET_KEY`: Flask secret key
+- `ADMIN_EMAIL`: Email address that should receive admin access in production
 - `DATABASE_URL`: PostgreSQL connection string
 - `STRIPE_SECRET_KEY`: Stripe API key
 - `STRIPE_WEBHOOK_SECRET`: Stripe webhook signing secret

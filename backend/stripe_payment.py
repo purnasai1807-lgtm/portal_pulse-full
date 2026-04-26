@@ -65,7 +65,9 @@ def create_checkout_session(user, plan_type="pro"):
 def get_subscription_status(user):
     """Get user's subscription status from Stripe."""
     if not user.stripe_subscription_id:
-        return {"plan": user.plan or "free", "status": "inactive", "current_period_end": None}
+        plan = user.plan or "free"
+        status = "active" if plan == "free" else (user.subscription_status or "inactive")
+        return {"plan": plan, "status": status, "current_period_end": None}
 
     try:
         subscription = stripe.Subscription.retrieve(user.stripe_subscription_id)
@@ -119,7 +121,7 @@ def handle_webhook(event):
         elif event_type == "customer.subscription.deleted":
             user = User.query.filter_by(stripe_subscription_id=obj.get("id")).first()
             if user:
-                user.subscription_status = "canceled"
+                user.subscription_status = "active"
                 user.plan = "free"
                 user.stripe_subscription_id = ""
                 db.session.commit()

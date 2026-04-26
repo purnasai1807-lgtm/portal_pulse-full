@@ -21,6 +21,11 @@ from stripe_payment import create_checkout_session, get_subscription_status, can
 
 APP_NAME = "PortalPulse Pro"
 
+def normalize_database_url(value):
+    if value.startswith("postgres://"):
+        return value.replace("postgres://", "postgresql://", 1)
+    return value
+
 def normalize_text(text):
     return re.sub(r"\s+", " ", text).strip().lower()
 
@@ -152,7 +157,8 @@ def validate_portal_payload(payload):
 def create_app():
     app = Flask(__name__)
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-me")
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///portalpulse.db")
+    database_url = normalize_database_url(os.environ.get("DATABASE_URL", "sqlite:///portalpulse.db"))
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     frontend_origins = [
@@ -236,11 +242,14 @@ def create_app():
             return jsonify({"error": "Email already exists"}), 400
 
         is_first_user = User.query.count() == 0
+        admin_email = (os.environ.get("ADMIN_EMAIL") or "").strip().lower()
         user = User(
             name=name,
             email=email,
             password_hash=generate_password_hash(password),
-            is_admin=is_first_user
+            is_admin=(email == admin_email) if admin_email else is_first_user,
+            plan="free",
+            subscription_status="active"
         )
         db.session.add(user)
         db.session.commit()
@@ -255,6 +264,10 @@ def create_app():
         user = User.query.filter_by(email=email).first()
         if not user or not check_password_hash(user.password_hash, password):
             return jsonify({"error": "Invalid credentials"}), 400
+
+        if user.plan == "free" and not user.stripe_subscription_id and user.subscription_status != "active":
+            user.subscription_status = "active"
+            db.session.commit()
 
         session["user_id"] = user.id
         return jsonify({
@@ -476,7 +489,7 @@ def create_app():
         })
 
     @app.post("/api/portals")
-    @paid_required
+    @login_required
     def create_portal():
         user = current_user()
         payload, error = validate_portal_payload(request.get_json(force=True))
@@ -511,7 +524,7 @@ def create_app():
         return jsonify({"message": "Portal created", "id": portal.id})
 
     @app.put("/api/portals/<int:portal_id>")
-    @paid_required
+    @login_required
     def update_portal(portal_id):
         user = current_user()
         portal = Portal.query.filter_by(id=portal_id, user_id=user.id).first()
@@ -537,7 +550,7 @@ def create_app():
         return jsonify({"message": "Portal updated"})
 
     @app.delete("/api/portals/<int:portal_id>")
-    @paid_required
+    @login_required
     def delete_portal(portal_id):
         user = current_user()
         portal = Portal.query.filter_by(id=portal_id, user_id=user.id).first()
@@ -551,7 +564,7 @@ def create_app():
         return jsonify({"message": "Portal deleted"})
 
     @app.post("/api/portals/<int:portal_id>/test")
-    @paid_required
+    @login_required
     def test_portal(portal_id):
         user = current_user()
         portal = Portal.query.filter_by(id=portal_id, user_id=user.id).first()
@@ -596,7 +609,7 @@ def create_app():
             return jsonify({"error": str(e)}), 400
 
     @app.get("/api/portals/<int:portal_id>/history")
-    @paid_required
+    @login_required
     def portal_history(portal_id):
         user = current_user()
         portal = Portal.query.filter_by(id=portal_id, user_id=user.id).first()
@@ -631,7 +644,7 @@ def create_app():
         })
 
     @app.get("/api/settings")
-    @login_required
+    @admin_required
     def get_settings():
         settings_row = AppSetting.query.get(1)
         return jsonify({
@@ -644,7 +657,7 @@ def create_app():
         })
 
     @app.put("/api/settings")
-    @login_required
+    @admin_required
     def update_settings():
         settings_row = AppSetting.query.get(1)
         data = request.get_json(force=True)
@@ -658,7 +671,7 @@ def create_app():
         return jsonify({"message": "Settings saved"})
 
     @app.post("/api/settings/test-email")
-    @login_required
+    @admin_required
     def test_email():
         user = current_user()
         ok = send_email("PortalPulse Test Email", "Your email alerts are working.", user.email)

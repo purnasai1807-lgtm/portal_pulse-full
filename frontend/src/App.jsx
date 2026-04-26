@@ -54,7 +54,7 @@ function App() {
                 <Link to="/dashboard">Dashboard</Link>
                 <Link to="/billing">Billing</Link>
                 {user.is_admin && <Link to="/admin">Admin</Link>}
-                <Link to="/settings">Settings</Link>
+                {user.is_admin && <Link to="/settings">Settings</Link>}
                 <button onClick={handleLogout} className="btn-link">Logout</button>
               </>
             ) : (
@@ -79,7 +79,7 @@ function App() {
           <Route path="/portal/new" element={<PortalForm />} />
           <Route path="/portal/:id/edit" element={<PortalForm />} />
           <Route path="/portal/:id/history" element={<PortalHistory />} />
-          <Route path="/settings" element={<Settings />} />
+          <Route path="/settings" element={<Settings user={user} />} />
           <Route path="/billing" element={<Billing />} />
           <Route path="/admin" element={<Admin />} />
         </Routes>

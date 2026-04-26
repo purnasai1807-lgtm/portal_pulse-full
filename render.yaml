@@ -5,9 +5,12 @@
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
+    healthCheckPath: /api/health
     envVars:
       - key: SECRET_KEY
         generateValue: true
+      - key: ADMIN_EMAIL
+        sync: false
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_PRICE_ID
@@ -62,6 +65,10 @@
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
     envVars:
       - key: VITE_API_BASE_URL
         sync: false

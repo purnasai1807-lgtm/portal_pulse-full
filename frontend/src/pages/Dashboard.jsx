@@ -89,7 +89,9 @@ function Dashboard() {
           <h1>PortalPulse</h1>
           <div className='flex'>
             <Link to='/dashboard' className='btn btn-secondary'>Dashboard</Link>
-            <Link to='/settings' className='btn btn-secondary'>Settings</Link>
+            {data.user.is_admin && (
+              <Link to='/settings' className='btn btn-secondary'>Settings</Link>
+            )}
             {data.user.is_admin && (
               <Link to='/admin' className='btn btn-secondary'>Admin</Link>
             )}
@@ -101,7 +103,7 @@ function Dashboard() {
       <div className='container'>
         <div className='mb-3'>
           <h2>Welcome, {data.user.name}!</h2>
-          <p>Subscription: {data.user.subscription_status}</p>
+          <p>Plan: {data.user.plan} ({data.user.subscription_status})</p>
         </div>
 
         {actionMessage && (
@@ -222,7 +224,7 @@ function Dashboard() {
 
           <div className='card'>
             <h2>Billing</h2>
-            {data.user.subscription_status === 'active' ? (
+            {data.user.subscription_status === 'active' && data.user.plan !== 'free' ? (
               <div>
                 <p className='text-success'>Active subscription</p>
                 <button className='btn btn-secondary' onClick={handleBillingPortal}>
@@ -231,7 +233,7 @@ function Dashboard() {
               </div>
             ) : (
               <div>
-                <p>No active subscription</p>
+                <p>Free plan available with upgrade options.</p>
                 <Link to='/pricing' className='btn btn-primary'>Upgrade Now</Link>
               </div>
             )}
