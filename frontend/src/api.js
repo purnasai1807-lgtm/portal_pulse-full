@@ -1,7 +1,21 @@
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1'])
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
+const API_DISABLED = typeof window !== 'undefined' && !API_BASE && !LOCAL_HOSTS.has(window.location.hostname)
+const API_UNAVAILABLE_MESSAGE = 'Public site is live, but the backend is not connected yet.'
+
+function createUnavailableError() {
+  return new Error(API_UNAVAILABLE_MESSAGE)
+}
 
 const Api = {
+  isConfigured() {
+    return !API_DISABLED
+  },
+
   async request(endpoint, options = {}) {
+    if (API_DISABLED) {
+      throw createUnavailableError()
+    }
     const url = `${API_BASE}${endpoint}`
     const config = {
       credentials: 'include',
@@ -20,6 +34,9 @@ const Api = {
   },
 
   async me() {
+    if (API_DISABLED) {
+      return { user: null }
+    }
     return this.request('/api/auth/me')
   },
 

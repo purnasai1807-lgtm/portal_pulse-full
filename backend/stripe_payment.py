@@ -4,7 +4,6 @@ from models import db, User
 
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "")
 
-# Subscription Plans
 PLANS = {
     "free": {"price_id": None, "name": "Free", "portals": 2, "price": 0},
     "pro": {"price_id": os.environ.get("STRIPE_PRICE_PRO", ""), "name": "Pro", "portals": 50, "price": 29},

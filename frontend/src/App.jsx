@@ -15,6 +15,7 @@ import Admin from './pages/Admin.jsx'
 function App() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const apiConfigured = Api.isConfigured()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -49,7 +50,7 @@ function App() {
         <div className="container">
           <h1 className="logo">PortalPulse Pro</h1>
           <nav>
-          {user ? (
+            {user ? (
               <>
                 <Link to="/dashboard">Dashboard</Link>
                 <Link to="/billing">Billing</Link>
@@ -68,6 +69,11 @@ function App() {
           </nav>
         </div>
       </header>
+      {!apiConfigured && (
+        <div className="public-notice">
+          Public site is live. Sign in and live monitoring will work after the backend is connected.
+        </div>
+      )}
 
       <main>
         <Routes>

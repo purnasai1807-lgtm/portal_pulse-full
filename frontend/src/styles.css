@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --primary: #2563eb;
   --primary-dark: #1d4ed8;
   --secondary: #64748b;
@@ -10,57 +10,54 @@
   --border: #e2e8f0;
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
-
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
-
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.6;
   color: var(--dark);
   background: var(--light);
 }
-
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
 }
-
 .app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
-
 .header {
   background: white;
   border-bottom: 1px solid var(--border);
   box-shadow: var(--shadow);
 }
-
 .header .container {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
 }
-
 .logo {
   font-size: 1.5rem;
   font-weight: bold;
   color: var(--primary);
 }
-
 nav {
   display: flex;
   gap: 1rem;
   align-items: center;
 }
-
 nav a {
   color: var(--dark);
   text-decoration: none;
@@ -68,11 +65,9 @@ nav a {
   border-radius: 0.25rem;
   transition: background 0.2s;
 }
-
 nav a:hover {
   background: var(--light);
 }
-
 .btn-link {
   background: none;
   border: none;
@@ -82,23 +77,19 @@ nav a:hover {
   border-radius: 0.25rem;
   transition: background 0.2s;
 }
-
 .btn-link:hover {
   background: var(--light);
 }
-
 main {
   flex: 1;
   padding: 2rem 0;
 }
-
 .footer {
   background: var(--dark);
   color: white;
   text-align: center;
   padding: 1rem;
 }
-
 .loading {
   display: flex;
   justify-content: center;
@@ -106,7 +97,6 @@ main {
   height: 100vh;
   font-size: 1.2rem;
 }
-
 .card {
   background: white;
   border-radius: 0.5rem;
@@ -114,7 +104,6 @@ main {
   padding: 1.5rem;
   margin-bottom: 1rem;
 }
-
 .btn {
   display: inline-block;
   padding: 0.75rem 1.5rem;
@@ -125,111 +114,136 @@ main {
   text-decoration: none;
   transition: all 0.2s;
 }
-
+.btn:hover {
+  transform: translateY(-1px);
+}
 .btn-primary {
   background: var(--primary);
   color: white;
 }
-
 .btn-primary:hover {
   background: var(--primary-dark);
 }
-
 .btn-secondary {
   background: var(--secondary);
   color: white;
 }
-
 .btn-secondary:hover {
   background: #475569;
 }
-
 .btn-success {
   background: var(--success);
   color: white;
 }
-
 .btn-success:hover {
   background: #059669;
 }
-
 .btn-danger {
   background: var(--danger);
   color: white;
 }
-
 .btn-danger:hover {
   background: #dc2626;
 }
-
+.btn-outline {
+  background: white;
+  border: 1px solid var(--border);
+  color: var(--dark);
+}
+.btn-outline:hover {
+  background: var(--light);
+  border-color: var(--secondary);
+}
+.btn-sm {
+  padding: 0.5rem 0.85rem;
+  font-size: 0.9rem;
+}
+.btn-lg {
+  padding: 0.95rem 1.75rem;
+}
+.btn-block {
+  width: 100%;
+  text-align: center;
+}
 .form-group {
   margin-bottom: 1rem;
 }
-
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
 }
-
 .form-group input,
 .form-group textarea,
-.form-group select {
+.form-group select,
+.form-control {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid var(--border);
   border-radius: 0.25rem;
   font-size: 1rem;
 }
-
 .form-group textarea {
   min-height: 100px;
   resize: vertical;
 }
-
 .grid {
   display: grid;
   gap: 1rem;
 }
-
+.grid-1 {
+  grid-template-columns: 1fr;
+}
 .grid-2 {
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
-
 .grid-3 {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
-
+.flex {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+.gap-1 {
+  gap: 0.5rem;
+}
 .text-center {
   text-align: center;
 }
-
+.text-success {
+  color: #047857;
+}
 .mb-1 { margin-bottom: 0.5rem; }
 .mb-2 { margin-bottom: 1rem; }
 .mb-3 { margin-bottom: 1.5rem; }
-
 .mt-1 { margin-top: 0.5rem; }
 .mt-2 { margin-top: 1rem; }
 .mt-3 { margin-top: 1.5rem; }
-
+.ml-1 { margin-left: 0.25rem; }
+.ml-2 { margin-left: 0.5rem; }
 .alert {
   padding: 1rem;
   border-radius: 0.25rem;
   margin-bottom: 1rem;
 }
-
 .alert-success {
   background: #d1fae5;
   color: #065f46;
   border: 1px solid #a7f3d0;
 }
-
 .alert-error {
   background: #fee2e2;
   color: #991b1b;
   border: 1px solid #fecaca;
 }
-
 .badge {
   display: inline-block;
   padding: 0.25rem 0.5rem;
@@ -237,59 +251,45 @@ main {
   font-size: 0.75rem;
   font-weight: 500;
 }
-
 .badge-success {
   background: var(--success);
   color: white;
 }
-
 .badge-warning {
   background: var(--warning);
   color: white;
 }
-
 .badge-danger {
   background: var(--danger);
   color: white;
 }
-
 .badge-low {
   background: #10b981;
   color: white;
 }
-
 .badge-medium {
   background: #f59e0b;
   color: white;
 }
-
 .badge-high {
   background: #ef4444;
   color: white;
 }
-
-.ml-1 {
-  margin-left: 0.25rem;
-}
-
 .table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 1rem;
 }
-
 .table th,
 .table td {
   padding: 0.75rem;
   text-align: left;
   border-bottom: 1px solid var(--border);
 }
-
 .table th {
   background: var(--light);
   font-weight: 600;
 }
-
 .modal {
   position: fixed;
   top: 0;
@@ -302,7 +302,6 @@ main {
   align-items: center;
   z-index: 1000;
 }
-
 .modal-content {
   background: white;
   border-radius: 0.5rem;
@@ -312,27 +311,63 @@ main {
   max-height: 90vh;
   overflow-y: auto;
 }
-
 .close {
   float: right;
   font-size: 1.5rem;
   cursor: pointer;
   margin-bottom: 1rem;
 }
-
+.public-notice {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #bfdbfe;
+  background: #dbeafe;
+  color: #1e40af;
+  text-align: center;
+}
+.landing section {
+  padding: 4rem 0;
+}
+.hero {
+  background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 45%, #ffffff 100%);
+}
+.hero h1 {
+  margin-bottom: 1rem;
+  font-size: clamp(2.25rem, 5vw, 4rem);
+}
+.hero p {
+  max-width: 700px;
+  margin: 0 auto;
+  color: var(--secondary);
+  font-size: 1.1rem;
+}
+.features {
+  background: #f1f5f9;
+}
+.cta {
+  background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+}
+.auth,
+.portal-form {
+  padding: 2rem 0;
+}
 @media (max-width: 768px) {
   .header .container {
     flex-direction: column;
     gap: 1rem;
   }
-
   nav {
     flex-wrap: wrap;
     justify-content: center;
   }
-
   .grid-2,
   .grid-3 {
     grid-template-columns: 1fr;
+  }
+  .flex-between {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hero h1 {
+    font-size: 2.5rem;
   }
 }

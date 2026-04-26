@@ -304,8 +304,6 @@ def create_app():
             }
         })
 
-    # === BILLING ENDPOINTS ===
-    
     @app.get("/api/billing/plans")
     def get_plans():
         """Get available subscription plans"""
@@ -496,7 +494,6 @@ def create_app():
         if error:
             return jsonify({"error": error}), 400
 
-        # Check portal limit
         portal_limit = get_portal_limit(user)
         portal_count = Portal.query.filter_by(user_id=user.id).count()
         if portal_count >= portal_limit:
