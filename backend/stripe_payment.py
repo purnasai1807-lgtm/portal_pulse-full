@@ -10,6 +10,14 @@ PLANS = {
     "enterprise": {"price_id": os.environ.get("STRIPE_PRICE_ENTERPRISE", ""), "name": "Enterprise", "portals": 500, "price": 99}
 }
 
+def _get_app_url():
+    explicit = os.environ.get("APP_URL", "").strip()
+    if explicit:
+        return explicit.rstrip("/")
+    if os.environ.get("RAILWAY_PUBLIC_DOMAIN", "").strip():
+        return "https://purnasai1807-lgtm.github.io/portal_pulse-full"
+    return "http://localhost:5173"
+
 
 def _plan_from_price_id(price_id):
     """Map a Stripe price ID back to our plan key."""
@@ -44,6 +52,8 @@ def create_checkout_session(user, plan_type="pro"):
         if not user.stripe_customer_id:
             create_stripe_customer(user)
 
+        app_url = _get_app_url()
+
         checkout = stripe.checkout.Session.create(
             customer=user.stripe_customer_id,
             mode="subscription",
@@ -52,8 +62,8 @@ def create_checkout_session(user, plan_type="pro"):
                 "price": plan["price_id"],
                 "quantity": 1
             }],
-            success_url=os.environ.get("FRONTEND_URL", "http://localhost:5173") + "/billing?success=true",
-            cancel_url=os.environ.get("FRONTEND_URL", "http://localhost:5173") + "/billing?canceled=true",
+            success_url=app_url + "/billing?success=true",
+            cancel_url=app_url + "/billing?canceled=true",
             metadata={"user_id": user.id, "plan": plan_type}
         )
         return checkout

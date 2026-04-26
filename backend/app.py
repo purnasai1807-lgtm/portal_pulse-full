@@ -29,6 +29,39 @@ def normalize_database_url(value):
 def normalize_text(text):
     return re.sub(r"\s+", " ", text).strip().lower()
 
+def default_database_url():
+    explicit = os.environ.get("DATABASE_URL", "").strip()
+    if explicit:
+        return normalize_database_url(explicit)
+    volume_path = os.environ.get("RAILWAY_VOLUME_MOUNT_PATH", "").strip().rstrip("/")
+    if volume_path:
+        return f"sqlite:///{volume_path}/portalpulse.db"
+    return "sqlite:///portalpulse.db"
+
+def get_frontend_origins():
+    default_origins = "http://localhost:5173,https://purnasai1807-lgtm.github.io"
+    return [
+        origin.strip()
+        for origin in os.environ.get("FRONTEND_URL", default_origins).split(",")
+        if origin.strip()
+    ]
+
+def get_app_url():
+    if os.environ.get("APP_URL", "").strip():
+        return os.environ["APP_URL"].rstrip("/")
+    if os.environ.get("RAILWAY_PUBLIC_DOMAIN", "").strip():
+        return "https://purnasai1807-lgtm.github.io/portal_pulse-full"
+    return os.environ.get("APP_URL", "http://localhost:5173").rstrip("/")
+
+def get_secret_key():
+    explicit = os.environ.get("SECRET_KEY", "").strip()
+    if explicit:
+        return explicit
+    railway_project_id = os.environ.get("RAILWAY_PROJECT_ID", "").strip()
+    if railway_project_id:
+        return f"portalpulse-{railway_project_id}"
+    return "change-me"
+
 def get_nested_value(data, path):
     current = data
     for part in path.split("."):
@@ -156,16 +189,11 @@ def validate_portal_payload(payload):
 
 def create_app():
     app = Flask(__name__)
-    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-me")
-    database_url = normalize_database_url(os.environ.get("DATABASE_URL", "sqlite:///portalpulse.db"))
-    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+    app.config["SECRET_KEY"] = get_secret_key()
+    app.config["SQLALCHEMY_DATABASE_URI"] = default_database_url()
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    frontend_origins = [
-        origin.strip()
-        for origin in os.environ.get("FRONTEND_URL", "http://localhost:5173").split(",")
-        if origin.strip()
-    ]
+    frontend_origins = get_frontend_origins()
     use_secure_cookies = not any(origin.startswith("http://localhost") for origin in frontend_origins)
 
     app.config["SESSION_COOKIE_HTTPONLY"] = True
@@ -350,7 +378,7 @@ def create_app():
     @login_required
     def billing_portal():
         user = current_user()
-        app_url = os.environ.get("FRONTEND_URL", "http://localhost:5173")
+        app_url = get_app_url()
 
         if not stripe.api_key or not user.stripe_customer_id:
             return jsonify({"error": "Billing portal is not available"}), 400

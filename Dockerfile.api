@@ -8,7 +8,8 @@ WORKDIR /app
 
 COPY backend/requirements.txt ./requirements.txt
 RUN pip install -r requirements.txt
+RUN mkdir -p /data
 
 COPY backend/ ./
 
-CMD ["sh", "-lc", "gunicorn app:app --bind 0.0.0.0:${PORT:-8080}"]
+CMD ["sh", "-lc", "python worker.py & gunicorn app:app --bind 0.0.0.0:${PORT:-8080}"]
