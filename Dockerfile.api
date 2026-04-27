@@ -1,15 +1,12 @@
-FROM python:3.12-slim
-
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
+FROM node:20-alpine
 
 WORKDIR /app
 
-COPY backend/requirements.txt ./requirements.txt
-RUN pip install -r requirements.txt
-RUN mkdir -p /data
+COPY backend/package*.json ./
+RUN npm install
 
 COPY backend/ ./
 
-CMD ["sh", "-lc", "python worker.py & gunicorn app:app --bind 0.0.0.0:${PORT:-8080}"]
+ENV NODE_ENV=production
+
+CMD ["sh", "-lc", "npm start"]
